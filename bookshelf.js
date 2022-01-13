@@ -1,7 +1,7 @@
 class Library {
-  constructor (books, readers) {
-    this._books = books
-    this._readers = readers
+  constructor ( booksArray, readersArray ) {
+    this._books = booksArray
+    this._readers = readersArray
   }
 
 
@@ -13,41 +13,35 @@ class Library {
     return this._readers;
   }
 
-  doHaveBook(requestedBook){
-    return this.books.includes(requestedBook)
+  doHaveBook ( requestedBook ) {
+    return requestedBook instanceof Book && this.books.includes( requestedBook )
   }
 
-  addBook(newBook){
-    const index = this.books.findIndex(el => el === newBook)
-    if(index  > 0 ){
-      this._books[index].quantity ++
-    }else{
-      this._books.push(newBook)
+  addBook ( newBook ) {
+    const index = this.books.findIndex( el => el === newBook )
+    if ( newBook instanceof LibraryBook && index > 0 ) {
+      this._books[ index ].quantity++
+    } else if ( newBook instanceof LibraryBook ) {
+      this._books.push( newBook )
+      return this.books
     }
   }
 
-  addBooks(newBooks){
-    for(let book of newBooks){
-      const index = this.books.findIndex(el => el === book)
-      if(index  > 0 ){
-        this._books[index].quantity ++
-      }else{
-        this._books.push(book)
-      }
+  addBooks ( newBooks ) {
+    for ( let book of newBooks ) {
+      this.addBook( book )
     }
 
     return this.books
   }
 
-  checkReaderId(readerId){
-    return this.readers.findIndex( reader => reader._readerId === readerId ) > 0
+  checkReaderId ( readerId ) {
+    return this.readers.findIndex( reader => reader.readerId === readerId ) >= 0
   }
 
-  lendBook(book, readerId){
-    const findedBook = this.books.find(book => book === book)
-    return (findedBook && this.readers.findIndex(reader => reader._readerId === readerId)) ? findedBook : false
+  lendBook ( book, readerId ) {
+    return (this.doHaveBook(book) && this.checkReaderId(readerId)) ? book : false
   }
-
 
 
 }
@@ -77,7 +71,7 @@ class Reader {
   }
 
   set lastName ( newLastName ) {
-    if(typeof newLastName === 'string') {
+    if ( typeof newLastName === 'string' ) {
       this.lastName = newLastName;
     }
   }
@@ -103,18 +97,17 @@ class Reader {
   }
 
   toString () {
-    return `${ this.firstName } ${this.lastName}`
+    return `${ this.firstName } ${ this.lastName }`
   }
 
-  borrowBook(book,library){
-    const borroedBook = library.find(el => book.title === el.title)
-    if(borroedBook && book instanceof ReaderBook){
-      this._books.push(borroedBook)
+  borrowBook ( book, library ) {
+    const borroedBook = library.find( el => book.title === el.title )
+    if ( borroedBook && book instanceof ReaderBook ) {
+      this._books.push( borroedBook )
     }
   }
 
 }
-
 
 class Book {
   constructor ( title, author ) {
@@ -137,7 +130,7 @@ class Book {
   }
 
   isTheSameBook ( book ) {
-    return book._title === this._title && book._author === this._author
+    return book instanceof Book && book.title === this.title && book.author === this.author
   }
 
 }
@@ -146,9 +139,11 @@ class Book {
 class LibraryBookBase extends Book {
   constructor ( title, author, bookId ) {
     super( title, author );
-    this._bookId = bookid
-    this._bookId = bookId;
+    this._bookId = LibraryBookBase.count++
   }
+
+
+  static count = 0
 
   get bookId () {
     return this._bookId;
@@ -160,10 +155,11 @@ class LibraryBookBase extends Book {
 class LibraryBook extends Book {
   constructor ( title, author, bookId, quantity ) {
     super( title, author );
-    this._bookId = bookId
+    this._bookId = LibraryBook.count++
     this._quantity = quantity
   }
 
+  static  count = 0
 
   get bookId () {
     return this._bookId;
@@ -239,6 +235,29 @@ class ReaderBook extends Book {
 }
 
 
-const newBook = new Book( 'asdasd', 'dsdfsdf' )
+const newBook = new Book( 'You don\'t know JS', 'Kyle Simpson' )
 
+
+const fakeBook = {
+  _title: 'Learn JS',
+  _author: 'Mickel Jackson'
+}
+
+const libraryBook1 = new LibraryBook( 'Samvel', 'Rafii', 13, 22 )
+
+const learnJs = new Book( 'Learn JS', 'Mickel Jackson' )
+const dontKnowJs = new Book( 'You don\'t know JS', 'Simpson Dzia' )
+const shunnUKatun = new Book( 'SHunn u katun', 'Hovhannes Tumanyan' )
+
+const reader1 = new Reader( 'Hrach', 'Tovmasyan', 43, [learnJs] )
+const reader2 = new Reader( 'Hrant', 'Toghatyan', 13, [learnJs] )
+
+const library1 = new Library( [learnJs, libraryBook1, dontKnowJs], [reader1, reader2])
+
+
+// console.log('Librari1 Readers', library1.readers)
+// console.log(library1.checkReaderId(4))
+
+
+console.log(library1.lendBook(learnJs,43))
 
