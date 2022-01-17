@@ -1,7 +1,7 @@
 class Library {
-  constructor ( booksArray, readersArray ) {
+  constructor ( booksArray) {
     this._books = booksArray
-    this._readers = readersArray
+    this._readers = []
   }
 
 
@@ -14,7 +14,7 @@ class Library {
   }
 
   doHaveBook ( requestedBook ) {
-    return requestedBook instanceof Book && this.books.includes( requestedBook )
+    return requestedBook instanceof Book && this.books.some(el => el.name === requestedBook.name && el.author === requestedBook.author )
   }
 
   addBook ( newBook ) {
@@ -28,10 +28,11 @@ class Library {
   }
 
   addBooks ( newBooks ) {
-    for ( let book of newBooks ) {
-      this.addBook( book )
-    }
 
+    const isValidBooks = newBooks.every( el => el instanceof LibraryBook)
+    if(isValidBooks){
+      this.books = [...this.books,...newBooks]
+    }
     return this.books
   }
 
@@ -45,7 +46,6 @@ class Library {
 
 
 }
-
 
 class Reader {
   constructor ( firstName, lastName, readerId, booksArray ) {
@@ -201,12 +201,14 @@ class LibraryBook extends Book {
 
 
 class ReaderBook extends Book {
-  constructor ( title, author, bookId, expirationDate ) {
+  constructor ( title, author, expirationDate ) {
     super( title, author );
     this._bookId = bookId
-    this._expirationDate = expirationDate
+    this._expirationDate = String(expirationDate)
+    this._id=ReaderBook.idCount++
+    this.isReturned = false
   }
-
+static idCount = 0;
   get bookId () {
     return this._bookId;
   }
@@ -233,25 +235,19 @@ class ReaderBook extends Book {
 
 
 }
-
+console.dir(ReaderBook)
 
 const newBook = new Book( 'You don\'t know JS', 'Kyle Simpson' )
-
-
 const fakeBook = {
   _title: 'Learn JS',
   _author: 'Mickel Jackson'
 }
-
 const libraryBook1 = new LibraryBook( 'Samvel', 'Rafii', 13, 22 )
-
 const learnJs = new Book( 'Learn JS', 'Mickel Jackson' )
 const dontKnowJs = new Book( 'You don\'t know JS', 'Simpson Dzia' )
 const shunnUKatun = new Book( 'SHunn u katun', 'Hovhannes Tumanyan' )
-
 const reader1 = new Reader( 'Hrach', 'Tovmasyan', 43, [learnJs] )
 const reader2 = new Reader( 'Hrant', 'Toghatyan', 13, [learnJs] )
-
 const library1 = new Library( [learnJs, libraryBook1, dontKnowJs], [reader1, reader2])
 
 
